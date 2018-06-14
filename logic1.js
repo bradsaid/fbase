@@ -9,7 +9,7 @@ let config = {
 };
 firebase.initializeApp(config);
 
-let database = firebase.database().ref().child("trains");
+let database = firebase.database().ref();
 
 let train = "";
 let destination = "";
@@ -18,8 +18,15 @@ let frequency = 0;
 
 
 database.on("child_added", snap => {
-    let train = snap.child("train").val();
+    let train = snap.val().train;
+    let destination = snap.val().destination;
+    let trainTime = snap.val().time;
+    let frequency = snap.val().frequency;
     console.log(train);
+    $("#trains").text(train);
+    $("#destinations").text(destination);
+    $("#frequencies").text(frequency);
+    $("#traintimes").text(trainTime);
 })
 
 
@@ -49,7 +56,7 @@ $("#submit-bid").on("click", function(event) {
   let destination = $("#destination").val().trim();
   let trainTime = parseInt($("#train-time").val().trim());
   let frequency = parseInt($("#frequency").val().trim());
-      database.set({
+      database.push({
       train: train1,
       frequency: frequency,
       destination : destination,
