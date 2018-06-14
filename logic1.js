@@ -13,40 +13,34 @@ let database = firebase.database().ref();
 
 let train = "";
 let destination = "";
-let trainTime = 0;
+let trainTime = "";
 let frequency = 0;
 
 
-database.on("child_added", snap => {
+database.on("child_added", function (snap) {
     let train = snap.val().train;
     let destination = snap.val().destination;
-    let trainTime = snap.val().time;
+    let trainTime = snap.val().time;  
     let frequency = snap.val().frequency;
-    console.log(train);
-    $("#trains").text(train);
-    $("#destinations").text(destination);
-    $("#frequencies").text(frequency);
-    $("#traintimes").text(trainTime);
-})
+    let time1 = moment(trainTime, "HH:mm").subtract(1, "years");
+    let timeComparison = moment().diff(moment(time1), "minutes");
+    let remainder = timeComparison % frequency;
+    let remainingTime = frequency - remainder;
+    let trainNext = moment().add(remainingTime, "minutes");
+    let useThisTime = moment(trainNext).format("HH:mm");
 
 
-/*database.ref().child("trains").on("value", function(snapshot) {  // ttrying to set path to pull  LEFT OFF HERE
-  if (snapshot.child("train").exists() && snapshot.child("frequency").exists() && snapshot.child("time").exists() && snapshot.child("destination").exists()) {
-    train = snapshot.val().train;
-    destination = snapshot.val().destination;
-    trainTime = parseInt(snapshot.val().time);
-    frequency = parseInt(snapshot.val().frequency);
-    console.log(train);
-  }
-  /// a for loop here to add each table row?
-  $("#trains").text(train);
-  $("#destinations").text(destination);
-  $("#frequencies").text(frequency);
-  $("#traintimes").text(trainTime);
+    $("#display").append(
+      ' <tr><td>' + train + '</td>' +
+      ' <td>' + destination + '</td>' +
+      ' <td>' + useThisTime + '</td>' +
+      ' <td>' + frequency + " minutes" + ' </td>' +
+      ' <td>' + remainingTime + " minutes" + '</tr>'
+    )
+  }, function(errorObject) {
+    console.log("The read failed: " + errorObject.code);
+  });
 
-}, function(errorObject) {
-  console.log("The read failed: " + errorObject.code);
-});*/
 
 
 $("#submit-bid").on("click", function(event) {
@@ -54,7 +48,8 @@ $("#submit-bid").on("click", function(event) {
   // Get the input values
   let train1 = $("#train-name").val().trim();  
   let destination = $("#destination").val().trim();
-  let trainTime = parseInt($("#train-time").val().trim());
+  let trainTime = $("#train-time").val().trim();
+  console.log(trainTime);
   let frequency = parseInt($("#frequency").val().trim());
       database.push({
       train: train1,
@@ -62,6 +57,7 @@ $("#submit-bid").on("click", function(event) {
       destination : destination,
       time : trainTime
     });
+
 
   
 });
